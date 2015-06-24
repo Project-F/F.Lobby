@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>F.Lobby PvP example</title>
+<meta name='viewport' content='width=device-width, user-scalable=no'>
+<style>
+body
+{
+	font-family:Arial,sans;
+	font-size:12pt;
+	overflow:hidden;
+}
+#canvas
+{
+	position:absolute;
+	left:0px;
+	top:0px;
+	right:0px;
+	bottom:0px;
+	overflow:hidden;
+}
+.ball
+{
+	position:absolute;
+	width:50px;
+	height:50px;
+	border-radius:25px;
+}
+#ball1
+{
+	background:#FAA;
+}
+#ball2
+{
+	background:#AAF;
+}
+#lobby_holder
+{
+	position:absolute;
+    left:0; top:0; right:0; bottom:0;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	align-content: center;
+	align-items: center;
+	border:none;
+}
+#lobby_holder > *
+{
+	width:100%;
+}
+#lobby
+{
+	flex: 1 1 auto;
+	border:none;
+}
+#console-log
+{
+	position:absolute;
+    left:0;
+    top:0;
+	width:99%;
+	height:99%;
+	border:none;
+}
+#fps
+{
+	position:absolute;
+    right:10px;
+    bottom:10px;
+    width:60px;
+}
+.header
+{
+	height:50px;
+	min-height:50px;
+	background:#444466;
+	font-size:15px;
+	line-height:50px;
+}
+.nav
+{
+	padding-left: 10px;
+}
+.nav > a
+{
+	color:#FFF;
+	padding:10px;
+	text-decoration:none;
+	border:1px solid white;
+	cursor:pointer;
+}
+.nav > a:hover
+{
+	background:#449;
+}
+</style>
+</head>
+<body>
+<textarea id='console-log'></textarea>
+<div id='canvas'>
+	<div id='ball1' class='ball'></div>
+	<div id='ball2' class='ball'></div>
+</div>
+<input type='text' id='fps'>
+
+<div id='lobby_holder'>
+	<div class='header'>
+		<div class='nav'>
+			<a>F.Lobby</a>
+		</div>
+	</div>
+	<iframe id='lobby'></iframe>
+</div>
+
+<script data-main="./" src="require.js"></script>
+<script>
+requirejs([],function(){
+
+var lobby = document.getElementById('lobby');
+var server;
+var server_address = location.origin;
+
+//step 1: get protocol from lobby server
+(function get_protocol()
+{
+	var request = new XMLHttpRequest();
+	request.onload = function()
+	{
+		server = JSON.parse(this.responseText);
+		//create iframe
+		lobby.src = server_address+'/lobby';
+		lobby.onload = function()
+		{
+			//initializes lobby
+			lobby.contentWindow.postMessage({
+				init: true,
+				protocol: 'F.Lobby 0.1',
+				room: 'bvb' //specify chat room
+			}, server_address);
+		}
+	}
+	request.open('GET', server_address+'/protocol', true);
+	request.responseType = 'text';
+	request.timeout = 2000;
+	request.send();
+}());
+
+//step 2: listen to lobby event
+window.addEventListener('message', windowMessage, false);
+function windowMessage(event)
+{
+	if( event.origin===server_address)
+	if( event.data.event==='start')
+	{
+		setup(event.data);
+		//hide the iframe
+		document.getElementById('lobby_holder').style.display='none';
+	}
+}
+
+//step 3:
+function setup(param)
+{
+	//load the transport library
+	requirejs([server.address+server.library],function(transport)
+	{
+		transport.setup({
+			server:server,
+			param:param
+		}, handler);
+		ball1 = document.getElementById('ball'+(config.param.role==='active'?1:2));
+		ball2 = document.getElementById('ball'+(config.param.role==='active'?2:1));
+	});
+}
+
+//step 4: implement communication handler
+var sender;
+var handler=
+{
+	on:function(event, data)
+	{
+		switch (event)
+		{
+			case 'open': //channel established
+				sender=function(mess)
+				{
+					data.send(mess)
+				};
+				console_log('game start');
+				start();
+				frame(null, sender);
+			break;
+			case 'close':
+				console_log('connection closed');
+			break;
+			case 'log':
+				console_log(data);
+			break;
+			case 'error':
+				console_log('error: '+data);
+			break;
+			case 'data': //received data from peer
+				frame(data, sender);
+			break;
+		}
+	}
+};
+
+//gaming code
+var ball1,
+	ball2,
+	mousex = 100,
+	mousey = 100;
+
+document.addEventListener('touchmove', touchmove, false);
+document.addEventListener('mousemove', mousemove, false);
+function mousemove(e)
+{
+	e=e?e:event;
+	mousex=e.clientX;
+	mousey=e.clientY;
+}
+function touchmove(e)
+{
+	var touches = e.touches;
+	if( touches.length>0)
+	{
+		mousex = touches[0].clientX | 0;
+		mousey = touches[0].clientY | 0;
+	}
+	e.preventDefault();
+}
+
+function start()
+{
+	ball1.style.left = '100px';
+	ball1.style.top = '100px';
+	ball2.style.left = '100px';
+	ball2.style.top = '100px';
+}
+
+function frame(data, send)
+{
+	var ox = parseInt(ball1.style.left),
+		oy = parseInt(ball1.style.top);
+	ball1.style.left=mousex+'px';
+	ball1.style.top=mousey+'px';
+	if( data)
+	{
+		//apply the delta received from other side
+		ball2.style.left=data.vx+parseInt(ball2.style.left)+'px';
+		ball2.style.top=data.vy+parseInt(ball2.style.top)+'px';
+		if( data.vx && data.vy && 0)
+			console_log(data.vx+','+data.vy);
+		//check if same as actual position
+		if( parseInt(ball2.style.left)!==data.x ||
+			parseInt(ball2.style.top)!==data.y)
+			console_log('synchronization error! ('+parseInt(ball2.style.left)+','+parseInt(ball2.style.top)+') ('+data.x+','+data.y+')');
+		calculate_fps(30);
+	}
+	//send synchronization data to the other side immediately.
+	//note that we have no cooldown mechanism such that framerate will burst high.
+	send({
+		x:mousex,
+		y:mousey,
+		vx:mousex-ox,
+		vy:mousey-oy
+	});
+}
+
+//utils
+var calculate_fps = (function(){
+	//calculate average frames per second
+	var time;
+	var itr=0;
+	var fps=document.getElementById('fps');
+	return function (skip)
+	{
+		if( (itr++) % skip===0)
+		{
+			var ot=time;
+			time = new Date().getTime();
+			var diff = time-ot;
+			fps.value = Math.round(1000/diff*skip)+'fps';
+		}
+	}
+}());
+
+function console_log(mess)
+{
+	var logger = document.getElementById('console-log');
+	logger.innerHTML+=mess+'\n';
+	logger.scrollTop+=100;
+}
+
+});
+</script>
+</body>
+</html>

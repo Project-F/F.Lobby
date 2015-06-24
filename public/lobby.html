@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Lobby</title>
+<meta name='viewport' content='width=device-width, user-scalable=no'>
+<link rel='stylesheet' href='modal.css'>
+<script src='http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js'></script>
+<style>
+body
+{
+	font-family:Arial,sans;
+	font-size:12pt;
+	overflow:hidden;
+}
+.lodge
+{
+    position: absolute;
+    left:0; top:0; right:0; bottom:0;
+    
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	align-content: center;
+	align-items: center;
+}
+.lodge > *
+{
+	width: 100%;
+}
+.lodge .body
+{
+	flex: 1 1 auto;
+	background:#F5F5F5;
+	position:relative;
+	overflow-y:scroll;
+	overflow-x:auto;
+}
+.lodge .body > div
+{
+}
+.lodge .foot
+{
+	height:40px;
+	min-height:40px;
+	position:relative;
+}
+.lodge .login
+{
+	padding:10px;
+}
+.lodge .login form
+{
+	margin:20px;
+}
+.lodge input
+{
+	height:30px;
+	padding:0 10px;
+}
+.lodge .button
+{
+	background:#29298a;
+	border: 0 none;
+	color: #FFF;
+	font-size: 15px;
+	height:30px;
+	padding:0 10px;
+}
+.lodge .button:hover
+{
+	background:#35b3ee;
+}
+.lodge .foot .chat
+{
+	display: flex;
+	flex-flow: row nowrap;
+	height:100%;
+}
+.lodge .foot .chat > *
+{
+	height:100%;
+}
+.lodge .foot .chat .input
+{
+	flex: 1 1 auto;
+	padding:0 10px;
+	margin:0;
+	border:none;
+	font-family:Arial;
+	font-size:20px;
+}
+.lodge .foot .chat input.button
+{
+	width:40px;
+}
+.lodge .mess
+{
+	background:#FFF;
+}
+.lodge .errormess
+{
+	color:#F00;
+}
+.lodge .mess ul
+{
+	display:block;
+	padding:0;
+	margin:0;
+}
+.lodge .mess li
+{
+	display:block;
+	padding:5px;
+}
+.lodge .mess li:nth-child(even)
+{
+	background:#EFEFEF;
+}
+</style>
+</head>
+<body>
+	<div class='lodge'>
+		<div class='body'>
+			<div class='login'>
+				<p>Play against another human player!</p>
+				<form>
+					<input class='name' type='text' placeholder='your name'>
+					<input class='button' type='submit' value='Login'>
+				</form>
+			</div>
+			<div class='mess'>
+				<ul>
+				</ul>
+			</div>
+		</div>
+		<div class='foot'>
+			<form class='chat'>
+				<input class='input' type='text' placeholder='type a message...'></input>
+				<input class='button' type='submit' value='>'>
+			</form>
+		</div>
+		
+		<section class='semantic-content' id='connect-dialog' tabindex='-1' role='dialog' aria-labelledby='modal-label' aria-hidden='true'>
+			<div class='modal-inner'>
+				<header>
+				<h2>Connect to</h2>
+				</header>
+				<div class='modal-content'>
+				<p></p>
+				</div>
+				<footer>
+				<button class='button'>Yes</button>
+				</footer>
+			</div>
+			<a href='#!' class='modal-close' title='Close this modal' data-dismiss='modal'>&times;</a>
+		</section>
+	</div>
+
+<script>
+
+var ws, //webSocket
+	name,
+	room,
+	host,
+	selected,
+	selected_id,
+	dialog,
+	waiting_timer,
+	id = (function UID()
+	{	//generate a unique ID
+		return 'xxxxxxxx'.replace(/[xy]/g, function(c) {
+			var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+			return v.toString(16);
+		});
+	}());
+
+$('.lodge .login form').submit(function(e){
+	//login to the chat room
+	name = $.trim($('.login form .name').val());
+	$.ajax({
+		url: '/login',
+		type: 'POST',
+		dataType: 'json',
+        contentType: 'application/json; charset=UTF-8',
+		data: JSON.stringify({
+			name:name,
+			room:room,
+			origin:host.origin
+		}),
+		success: logged_in
+	});
+	return false;
+});
+if('localStorage' in window)
+{
+	if( localStorage.cache)
+	{
+		var cache = JSON.parse(localStorage.cache);
+		$('.login form .name').val(cache.name);
+	}
+}
+function logged_in(data)
+{
+	if( data.success)
+	{
+		$('.lodge .login').hide();
+		connectws();
+		$('.lodge .mess ul').append($('<li>').append(
+			'Welcome to the '+room+' Lobby. Here you can find friends to play against you.<br>'+
+			'Click on a name to initiate a match.<br>'
+		));
+		if('localStorage' in window)
+		{
+			localStorage.cache=JSON.stringify({name:name});
+		}
+	}
+	else
+	{
+		$('.lodge .mess ul').append($('<li>').append(
+			'<span class="errormess">'+data.mess+'</span>'
+		));
+	}
+}
+function connectws()
+{	//handle web socket connections
+	var host = location.origin.replace(/^http/,'ws')+'/chat';
+	ws = new WebSocket(host);
+	ws.onopen=function()
+	{
+		ws.send(JSON.stringify({target:'all',name:name,room:room,mess:'logged in.'}));
+		$('.lodge .foot .chat').submit(function(e){
+			var mess=$('.lodge .foot .chat .input').val();
+			if( mess.length)
+				ws.send(JSON.stringify({target:'all',name:name,mess:mess}));
+			$('.lodge .foot .chat .input').val('');
+			return false;
+		});
+	}
+	ws.onclose=function()
+	{
+		$('.lodge .mess ul').append($('<li>').append(
+			'<span class="errormess">socket closed.</span>'
+		));
+	}
+	ws.onmessage=function(mess)
+	{
+		mess = JSON.parse(mess.data);
+		if( mess.mess)
+		{
+			if( mess.name===name || mess.name==='system')
+				$('.lodge .mess ul').append($('<li>').append(
+					mess.name+': '+$('<i>').text(mess.mess).html()
+				));
+			else
+				$('.lodge .mess ul').append($('<li>').append(
+					'<a href="#connect-dialog" onclick="connectto(\''+mess.name+'\')">'+mess.name+'</a>'+': '+$('<i>').text(mess.mess).html()
+				));
+			$('.lodge .body').scrollTop($('.lodge .body').scrollTop()+100);
+		}
+		if( mess.connect)
+		{
+			if( !dialog)
+			{
+				dialog='receive connection';
+				window.location.href = '#connect-dialog';
+				$('#connect-dialog .modal-content p').text(
+					mess.name+' sent you a connection request. '+
+					'Accept?'
+				);
+				$('#connect-dialog footer .button').show();
+				selected = mess.name;
+				selected_id = mess.id;
+			}
+			if( dialog==='connectto')
+			{
+				//receive ack!
+				$('#connect-dialog .modal-content p').text(
+					mess.name+' accepted your request!'
+				);
+				$('#connect-dialog footer .button').hide();
+				start_game(true,name+id,mess.name+mess.id);
+				window.location.href = '#!';
+			}
+		}
+	}
+}
+function connectto(name)
+{
+	dialog='connectto';
+	$('#connect-dialog .modal-content p').text(
+		'Are you sure to try connecting to '+name+'?'
+	);
+	$('#connect-dialog footer .button').show();
+	selected = name;
+}
+$('#connect-dialog footer .button').click(function()
+{	//the 'ok' button clicked
+	if( dialog==='connectto')
+	{	//initiate a connection attempt
+		ws.send(JSON.stringify({target:selected,name:name,id:id,connect:'connect'}));
+		$('#connect-dialog .modal-content p').html(
+			'Waiting for acceptance<span class="loadingdots"></span>'
+		);
+		$('#connect-dialog footer .button').hide();
+		var t=0;
+		if( !waiting_timer)
+		waiting_timer = setInterval(function()
+		{	//just to make the dots ticking
+			var dots;
+			switch (t%4)
+			{
+				case 0: dots=''; break;
+				case 1: dots='.'; break;
+				case 2: dots='..'; break;
+				case 3: dots='...'; break;
+			}
+			t++;
+			$('.loadingdots').text(dots);
+		},1000/3);
+	}
+	if( dialog==='receive connection')
+	{	//accept a connection attempt
+		ws.send(JSON.stringify({target:selected,name:name,id:id,connect:'connect'}));
+		$('#connect-dialog .modal-content p').text(
+			'You accepted '+selected+'\'s request!'
+		);
+		$('#connect-dialog footer .button').hide();
+		start_game(false,name+id,selected+selected_id);
+		window.location.href = '#!';
+	}
+});
+$(window).bind('hashchange', function(){
+	var hash = window.location.hash.replace(/^#/,'');
+	if( hash==='!')
+	{	//dialog closed
+		dialog='';
+	}
+});
+//cross window communication
+window.addEventListener('message', windowMessage, false);
+function windowMessage(event)
+{
+	if( window.self !== window.top) //in iframe
+	{
+		var data = event.data;
+		if( data.protocol==='F.Lobby 0.1')
+		if( data.init)
+		{
+			host = {
+				origin:event.origin,
+				source:event.source
+			};
+			room = data.room;
+		}
+	}
+}
+function start_game(active,id1,id2)
+{
+	if( host)
+		host.source.postMessage({event:'start',role:active?'active':'passive',id1:id1,id2:id2},host.origin);
+}
+</script>
+
+</body>
+</html>
