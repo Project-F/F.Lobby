@@ -1,3 +1,4 @@
+var url = require('url');
 var express = require('express');
 var WebSocketServer = require('ws').Server;
 var bodyParser = require('body-parser');
@@ -26,7 +27,8 @@ app.get('/protocol', function(req, res) {
 app.post('/login', bodyParser.json(), function(req, res) {
 	var name = req.body.name;
 	var room = req.body.room;
-	var origin = req.body.origin;
+	var host = ( req.headers.host.match(/:/g) ) ? req.headers.host.slice( 0, req.headers.host.indexOf(":") ) : req.headers.host;
+	var guest = url.parse(req.body.origin).hostname;
 
 	if( !name) {
 		res.send(JSON.stringify({
@@ -42,28 +44,30 @@ app.post('/login', bodyParser.json(), function(req, res) {
 		}));
 		return;
 	}
-	if( !origin) {
+	if( !guest) {
 		res.send(JSON.stringify({
 			success: false,
-			mess: 'Invalid origin.'
+			mess: 'Invalid hostname.'
 		}));
 		return;
 	}
 
 	if( config.public) {
-		if( blacklist[origin]) {
+		if( blacklist[guest]) {
 			res.send(JSON.stringify({
 				success: false,
-				mess: 'Origin '+origin+' in server blacklist.'
+				mess: 'Hostname '+guest+' in server blacklist.'
 			}));
 			return;
 		}
 	}
 	else {
-		if( !whitelist[origin]) {
+		if( guest===host) {
+			//okay
+		} else if( !whitelist[guest]) {
 			res.send(JSON.stringify({
 				success: false,
-				mess: 'Origin '+origin+' not in server whitelist.'
+				mess: 'Hostname '+guest+' not in server whitelist.'
 			}));
 			return;
 		}
