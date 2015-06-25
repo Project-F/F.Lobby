@@ -45,7 +45,7 @@ if( opts.peerjs)
 		path:path
 	};
 	app.use(path, PeerServer(http, {debug:true}));
-	console.log('PeerJs transport');
+	console.log('PeerJS transport');
 }
 else
 {
