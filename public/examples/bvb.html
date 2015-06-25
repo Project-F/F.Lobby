@@ -169,8 +169,8 @@ function setup(param)
 			server:server,
 			param:param
 		}, handler);
-		ball1 = document.getElementById('ball'+(config.param.role==='active'?1:2));
-		ball2 = document.getElementById('ball'+(config.param.role==='active'?2:1));
+		ball1 = document.getElementById('ball'+(param.role==='active'?1:2));
+		ball2 = document.getElementById('ball'+(param.role==='active'?2:1));
 	});
 }
 
@@ -260,7 +260,7 @@ function frame(data, send)
 		calculate_fps(30);
 	}
 	//send synchronization data to the other side immediately.
-	//note that we have no cooldown mechanism such that framerate will burst high.
+	//note that we have no rate control mechanism such that framerate will burst high.
 	send({
 		x:mousex,
 		y:mousey,
