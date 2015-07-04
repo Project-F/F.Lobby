@@ -32,7 +32,7 @@ Chris developed and published a HTML5 arcade game. The game has considerable ini
 
 The server provides two components, a lobby application and a peer communication programming library.
 
-#### Lobby
+#### Chat room
 
 The chat room application is intended to be embedded into host application via `iframe`. The chat room allows players to chat and pair up. When a pair of players decided to start a match, the lobby app will send a message to the host app. The host app can then use this information to establish a PvP channel and starts the game.
 

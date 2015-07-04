@@ -39,7 +39,7 @@ if( opts.peerjs)
 	var PeerServer = require('peer').ExpressPeerServer;
 	var path = '/peerjs';
 	lobby_config.protocol = {
-		name:'F.Lobby (p)',
+		name:'F.Lobby (PeerJS)',
 		library:'/peerjs/network.js',
 		port:port,
 		path:path
@@ -52,13 +52,13 @@ else
 	var PeerServer = require('./lobby').PeerServer;
 	var path = '/peer';
 	lobby_config.protocol = {
-		name:'F.Lobby (ws)',
+		name:'F.Lobby (WebSocket)',
 		library:'/ws/network.js',
 		port:port,
 		path:path
 	};
 	PeerServer(http, path);
-	console.log('websocket transport');
+	console.log('WebSocket transport');
 }
 
 app.use('/', Lobby(http, lobby_config));
