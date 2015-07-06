@@ -223,7 +223,8 @@ function logged_in(data)
 }
 function connectws()
 {	//handle web socket connections
-	var host = location.origin.replace(/^http/,'ws')+'/chat';
+	var origin = location.origin || (location.protocol + "//" + location.hostname + (location.port?':'+location.port:''));
+	var host = origin.replace(/^http/,'ws')+'/chat';
 	ws = new WebSocket(host);
 	ws.onopen=function()
 	{
