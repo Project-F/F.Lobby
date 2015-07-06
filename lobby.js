@@ -107,9 +107,11 @@ app.on('mount', function() {
 				}
 				if( data.target==='all') {
 					for( var I in rooms[room])
-						rooms[room][I].send(json);
+						if( rooms[room][I].send)
+							rooms[room][I].send(json);
 				} else {
-					rooms[room][data.target].send(json);
+					if( rooms[room][data.target].send)
+						rooms[room][data.target].send(json);
 				}
 			} catch (e) {
 				console.log(e);
