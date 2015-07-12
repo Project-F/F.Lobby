@@ -114,13 +114,15 @@ app.on('mount', function() {
 						rooms[room][data.target].send(json);
 				}
 			} catch (e) {
+				console.log(name+' caused an error.');
 				console.log(e);
 				ws.close();
 			}
 		});
 		ws.on('close', function() {
 			console.log('Client '+name+' disconnected');
-			delete rooms[room][name];
+			if( rooms[room] && rooms[room][name])
+			    delete rooms[room][name];
 		});
 	});
 });
