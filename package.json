@@ -2,6 +2,7 @@
   "name": "F.Lobby",
   "version": "0.1.0",
   "description": "A PvP game server for realtime games",
+  "author": "Project F Developers",
   "main": "lobby.js",
   "scripts": {
     "start": "node index.js --peerjs"
@@ -16,5 +17,9 @@
   },
   "engines": {
     "node": "^0.10.25"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Project-F/F.Lobby.git"
   }
 }
