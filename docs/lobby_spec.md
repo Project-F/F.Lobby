@@ -49,7 +49,7 @@ The server returns a JSON object with info for setting up the communication libr
 GET /protocol
 ```
 Return
-```
+```JavaScript
 var server=
 {
 	"name":     "Server Name",
@@ -61,7 +61,7 @@ var server=
 ### Lobby
 
 The lobby app is serverd at `/lobby`. When the lobby app is loaded, a cross window message should be sent to it for handshake.
-```
+```JavaScript
 {
 	"init":     true,
 	"protocol": "F.Lobby 0.1",
@@ -71,7 +71,7 @@ The lobby app is serverd at `/lobby`. When the lobby app is loaded, a cross wind
 The lobby will then join the specified chat room on server. Only players in the same room can see each other.
 
 For example,
-```
+```HTML
 <iframe id='lobby'></iframe>
 <script>
 var lobby = document.getElementById('lobby');
@@ -99,7 +99,7 @@ request.send();
 ```
 
 The host app should then listen to game start message from lobby:
-```
+```JavaScript
 var param=
 {
 	"event": "start",
@@ -108,7 +108,7 @@ var param=
 ```
 
 For example,
-```
+```JavaScript
 window.addEventListener('message', windowMessage, false);
 function windowMessage(event)
 {
@@ -125,7 +125,7 @@ function windowMessage(event)
 The `server` and `param` objects obtained from previous is used to setup the communication library.
 The communication library should be loaded at `server.address+server.library` using requirejs or other compatible module systems.
 Then, the `setup` function should be called, with a config object:
-```
+```JavaScript
 {
 	"server": { object obtained from /protocol },
 	"param":  { object obtained from game start message }
@@ -134,7 +134,7 @@ Then, the `setup` function should be called, with a config object:
 and an event handler.
 
 For example,
-```
+```JavaScript
 function setup(param)
 {
 	requirejs([server.address+server.library],function(transport)
@@ -170,7 +170,7 @@ data: error message
 data: data sent from the other side
 
 For example,
-```
+```JavaScript
 var sender;
 var handler=
 {
