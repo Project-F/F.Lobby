@@ -10,10 +10,9 @@ The three roles, __game__, __chatroom__ and __transport__ are clearly defined an
 npm install
 nodejs index.js --port 8001
 ```
-Open two windows in `http://localhost:8001/examples/bvb.html` and try.
+Open two windows in `http://localhost:8001/examples/bvb2.html` or our hosted [demo](http://lobby.projectf.hk/examples/bvb2.html) and try.
 
-## Demo
-http://lobby.projectf.hk/examples/bvb_both.html
+![](docs/cap.png)
 
 ## More
-Read the [docs](docs).
+Read the [tutorial](docs/tutorial.md) and [](docs).
