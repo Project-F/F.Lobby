@@ -115,94 +115,48 @@ body
 
 <script data-main="./" src="require.js"></script>
 <script>
-requirejs([],function(){
+server_address = location.origin;
 
-var lobby = document.getElementById('lobby');
-var server;
-var server_address = location.origin;
+requirejs(['lobby_helper', server_address+'/network.js'],function(lobby, network){
 
-//step 1: get protocol from lobby server
-(function get_protocol()
+lobby.create(
+	document.getElementById('lobby'),
+	server_address,
+	'bvb',
+	setup);
+
+function setup(config)
 {
-	var request = new XMLHttpRequest();
-	request.onload = function()
-	{
-		server = JSON.parse(this.responseText);
-		//create iframe
-		lobby.src = server_address+'/lobby';
-		lobby.onload = function()
-		{
-			//initializes lobby
-			lobby.contentWindow.postMessage({
-				init: true,
-				protocol: 'F.Lobby 0.1',
-				room: 'bvb' //specify chat room
-			}, server_address);
-		}
-	}
-	request.open('GET', server_address+'/protocol', true);
-	request.responseType = 'text';
-	request.timeout = 2000;
-	request.send();
-}());
-
-//step 2: listen to lobby event
-window.addEventListener('message', windowMessage, false);
-function windowMessage(event)
-{
-	if( event.origin===server_address)
-	if( event.data.event==='start')
-	{
-		setup(event.data);
-	}
-}
-
-//step 3:
-function setup(param)
-{
-	//load the transport library
-	requirejs([server.address+server.library],function(transport)
-	{
-		transport.setup({
-			server:server,
-			param:param
-		}, handler);
-	});
 	//hide the iframe
 	document.getElementById('lobby_holder').style.display='none';
 	//game setup
-	ball1 = document.getElementById('ball'+(param.role==='active'?1:2));
-	ball2 = document.getElementById('ball'+(param.role==='active'?2:1));
+	ball1 = document.getElementById('ball'+(config.param.role==='active'?1:2));
+	ball2 = document.getElementById('ball'+(config.param.role==='active'?2:1));
+	//setup networking
+	network.setup(config, monitor);
+	network.setInterval(frame, 1000/30);
 }
 
-//step 4: implement communication handler
-var sender;
-var handler=
+var monitor=
 {
 	on:function(event, data)
 	{
 		switch (event)
 		{
-			case 'open': //channel established
-				sender=function(mess)
-				{
-					data.send(mess)
-				};
-				console_log('game start');
-				start();
-				frame(null, sender);
+			case 'open':
+				console_log('open');
 			break;
 			case 'close':
-				console_log('connection closed');
+				console_log('close');
 			break;
 			case 'log':
-				console_log(data);
+				console_log('log'+': '+data);
 			break;
 			case 'error':
-				console_log('error: '+data);
+				console_log('error'+': '+data);
 			break;
-			case 'data': //received data from peer
-				frame(data, sender);
+			case 'sync_error':
+				console_log('sync_error');
 			break;
 		}
 	}
@@ -233,41 +187,50 @@ function touchmove(e)
 	e.preventDefault();
 }
 
-function start()
-{
-	ball1.style.left = '100px';
-	ball1.style.top = '100px';
-	ball2.style.left = '100px';
-	ball2.style.top = '100px';
-}
-
-function frame(data, send)
+function frame(time, data, send)
 {
 	var ox = parseInt(ball1.style.left),
 		oy = parseInt(ball1.style.top);
-	ball1.style.left=mousex+'px';
-	ball1.style.top=mousey+'px';
-	if( data)
+
+	if( time===0)
 	{
+		//start
+		//align states
+		ball1.style.left = '100px';
+		ball1.style.top = '100px';
+		ball2.style.left = '100px';
+		ball2.style.top = '100px';
+		send({
+			x:100,
+			y:100,
+			vx:0,
+			vy:0
+		});
+	}
+	else
+	{
+		//apply movement
+		ball1.style.left=mousex+'px';
+		ball1.style.top=mousey+'px';
+
 		//apply the delta received from other side
 		ball2.style.left=data.vx+parseInt(ball2.style.left)+'px';
 		ball2.style.top=data.vy+parseInt(ball2.style.top)+'px';
-		if( data.vx && data.vy && 0)
-			console_log(data.vx+','+data.vy);
+
 		//check if same as actual position
 		if( parseInt(ball2.style.left)!==data.x ||
 			parseInt(ball2.style.top)!==data.y)
 			console_log('synchronization error! ('+parseInt(ball2.style.left)+','+parseInt(ball2.style.top)+') ('+data.x+','+data.y+')');
 		calculate_fps(30);
+
+		//send synchronization data
+		send({
+			x:mousex,
+			y:mousey,
+			vx:mousex-ox,
+			vy:mousey-oy
+		});
 	}
-	//send synchronization data to the other side immediately.
-	//note that we have no rate control mechanism such that framerate will burst high.
-	send({
-		x:mousex,
-		y:mousey,
-		vx:mousex-ox,
-		vy:mousey-oy
-	});
 }
 
 //utils

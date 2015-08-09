@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>F.Lobby PvP example</title>
+<style>
+iframe
+{
+	position:absolute;
+	top:0px;
+	height:100vh;
+	width:50%;
+	border:none;
+}
+#peer1
+{
+	left:0px;
+}
+#peer2
+{
+	left:50%;
+}
+</style>
+</head>
+<body>
+<iframe id='peer1' src='bvb2.html'></iframe>
+<iframe id='peer2' src='bvb2.html'></iframe>
+<script>
+var aa = UID();
+var bb = UID();
+
+setTimeout(function(){
+	document.getElementById('peer1').contentWindow.postMessage({
+		event: 'start',
+		role: 'active',
+		id1: aa,
+		id2: bb
+	}, location.origin);
+	
+	document.getElementById('peer2').contentWindow.postMessage({
+		event: 'start',
+		role: 'passive',
+		id1: bb,
+		id2: aa
+	}, location.origin);
+}, 2000);
+
+function UID()
+{	//generate a unique ID
+	return 'xxxxxxxx'.replace(/[xy]/g, function(c) {
+		var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+		return v.toString(16);
+	});
+}
+</script>
+</body>
+</html>
