@@ -32,11 +32,11 @@ That's it. Such an underwhelming example, but it demonstrates the essence of PvP
 
 ## Coding
 First require the two scripts
-```
+```JavaScript
 requirejs(['lobby_helper', 'network'],function(lobby, network){
 ```
 Then create a lobby window in an iframe
-```
+```JavaScript
 lobby.create(
 	document.getElementById('lobby'),
 	server_address,
@@ -44,7 +44,7 @@ lobby.create(
 	setup);
 ```
 setup will be called when pairing is successful. Then you should do some setup work for your game as well as the network library
-```
+```JavaScript
 function setup(config)
 {
 	document.getElementById('lobby').style.display='none';
@@ -54,7 +54,7 @@ function setup(config)
 }
 ```
 implement the synchronized frame. It will be largely the same as your non PvP version, but in addition you receive the data from the other peer and apply to your game logic and send back some data as well.
-```
+```JavaScript
 function frame(time, data, send)
 {
     if( send) {
