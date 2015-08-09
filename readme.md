@@ -15,3 +15,7 @@ Open two windows in `http://localhost:8001/examples/bvb2.html` or our hosted [de
 
 ## More
 Read the [tutorial](docs/tutorial.md) and [docs](docs).
+
+## License
+Copyright 2015. The Project F developers
+[MIT](http://opensource.org/licenses/MIT)
