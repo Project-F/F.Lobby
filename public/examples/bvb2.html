@@ -144,19 +144,12 @@ var monitor=
 		switch (event)
 		{
 			case 'open':
-				console_log('open');
-			break;
 			case 'close':
-				console_log('close');
+				console_log(event);
 			break;
 			case 'log':
-				console_log('log'+': '+data);
-			break;
 			case 'error':
-				console_log('error'+': '+data);
-			break;
-			case 'sync_error':
-				console_log('sync_error');
+				console_log(event+': '+data);
 			break;
 		}
 	}
