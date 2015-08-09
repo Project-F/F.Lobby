@@ -58,3 +58,6 @@ The chat room Express app. Serving static pages under `/public`. And a websocket
 
 ### PeerServer
 A websocket server for peer communication.
+
+## Examples
+Two example apps are provided, bvb and bvb2. They essentially do the same thing, but bvb is library-less while bvb2 uses the network.js library. One distinction is that bvb has no proper framerate control.
