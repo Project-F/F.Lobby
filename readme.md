@@ -18,4 +18,5 @@ Read the [tutorial](docs/tutorial.md) and [docs](docs).
 
 ## License
 Copyright 2015. The Project F developers
+
 [MIT](http://opensource.org/licenses/MIT)
