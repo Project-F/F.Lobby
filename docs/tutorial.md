@@ -25,6 +25,8 @@ If you want a PeerJS version, do
 ```
 nodejs index.js --peerjs --public
 ```
+No matter which version you use, it is completely opaque to the client. No code change is needed.
+
 Open [http://localhost:8001/examples/bvb2.html]() or our demo on [lobby.projectf.hk](http://lobby.projectf.hk/examples/bvb2.html) in two windows. Login, say something, click a player's name and start game. If you see 'success' in the log messages, you should have two circles of different colors on the screen, which you can control one of them by mouse or touch. The other is controlled by your peer.
 
 That's it. Such an underwhelming example, but it demonstrates the essence of PvP gaming.
