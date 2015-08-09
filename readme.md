@@ -14,4 +14,4 @@ Open two windows in `http://localhost:8001/examples/bvb2.html` or our hosted [de
 ![](docs/cap.png)
 
 ## More
-Read the [tutorial](docs/tutorial.md) and [docs]().
+Read the [tutorial](docs/tutorial.md) and [docs](docs).
