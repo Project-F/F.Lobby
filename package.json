@@ -5,7 +5,7 @@
   "author": "Project F Developers",
   "main": "lobby.js",
   "scripts": {
-    "start": "node index.js --peerjs"
+    "start": "node index.js"
   },
   "dependencies": {
     "body-parser": "~1.12.0",
