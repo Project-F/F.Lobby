@@ -127,6 +127,14 @@ app.on('mount', function() {
 	});
 });
 
+setInterval(function()
+{
+	for( var room in rooms)
+		for( var I in rooms[room])
+			if( rooms[room][I].send)
+				rooms[room][I].send("{}");
+}, 1000*45); //every 45 sec; because heroku timeouts in 55 sec
+
 return app;
 }
 
