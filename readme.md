@@ -9,7 +9,7 @@ The three roles, __game__, __chatroom__ and __transport__ are clearly defined an
 ```
 nodejs index.js
 ```
-Open two windows in `http://localhost:8001/examples/bvb2.html` or our hosted [demo](http://lobby.projectf.hk/examples/bvb2.html) and try.
+Open two windows in `http://localhost:8001/examples/bvb2.html` and try. [Demo Video](https://www.youtube.com/watch?v=pdIfLtkQWZ0&lc=z23xjrmijmypjvrhn04t1aokg2ijhnzqqqpgzxzvdsy2rk0h00410).
 
 ![](docs/cap.png)
 
