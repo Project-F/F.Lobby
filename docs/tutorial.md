@@ -70,8 +70,8 @@ function frame(time, data, send)
 ```
 
 ## References
-- F.Lobby is used by [F.LF](http://www.projectf.hk/F.LF/), a 2D fighter (Beat 'em up) game
-- [network.js reference](http://www.projectf.hk/F.LF/core/docs/network_docs.html)
+- F.Lobby is used by [F.LF](https://github.com/Project-F/F.LF)
+- [network.js reference](http://project-f.github.io/F.LF/core/docs/network_docs.html)
 - [F.Lobby Reference](lobby_ref.md)
 - [F.Lobby Specification](lobby_spec.md)
 - Need help? Post your questions to
