@@ -75,4 +75,4 @@ function frame(time, data, send)
 - [F.Lobby Reference](lobby_ref.md)
 - [F.Lobby Specification](lobby_spec.md)
 - Need help? Post your questions to
-[https://github.com/Project-F/F.Lobby/issues]()
+[issues](https://github.com/Project-F/F.Lobby/issues)
