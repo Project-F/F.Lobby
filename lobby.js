@@ -12,6 +12,8 @@ module.exports.Lobby=function(http, config)
 var app = express();
 var rooms = {};
 
+app.set('trust proxy', true);
+
 app.use(cors());
 app.use('/', express.static(__dirname + '/public'));
 
